@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    environment {
+        // Define Kubernetes namespace and deployment parameters
+        K8S_NAMESPACE = 'hello-world'  // Adjust as needed
+        DEPLOYMENT_NAME = 'hello-nginx'
+        KUBECONFIG_PATH = '/testcluster-kubeconfig'  // Define your custom kubeconfig file path
+    }
+
+    stages {
+        stage('Export Kubeconfig') {
+            steps {
+                script {
+                    // Export the KUBECONFIG environment variable to use the custom kubeconfig path
+                    echo "Exporting KUBECONFIG from: ${KUBECONFIG_PATH}"
+                    sh "export KUBECONFIG=${KUBECONFIG_PATH}"
+                    sh "echo \$KUBECONFIG"  // Optional: Print out the KUBECONFIG to verify
+                }
+            }
+        }
+
+
+        stage('Deploy NGINX') {
+            steps {
+                script {
+                    // Create a basic NGINX deployment
+                    sh """
+                    kubectl create deployment ${DEPLOYMENT_NAME} --image=nginx --namespace=${K8S_NAMESPACE}
+                    """
+                }
+            }
+        }
+
+    }
+}
+
